@@ -1,80 +1,77 @@
-if (steps.init.org == "auvo") {
-  const cheerio = require("cheerio");
-  const axios = require("axios");
+const cheerio = require("cheerio");
+const axios = require("axios");
 
-  let cat = steps.init.cat;
-  let typ = steps.init.typ;
+let typ = "";
+let cat = "uyse";
+let year = "";
 
-  async function fetchHTML(url) {
-    const { data } = await axios.get(url);
-    return cheerio.load(data);
-  }
-  async function champ(key) {
-    const pilots = [];
-    try {
-      const urlBase = "https://www.auvo.com.uy/calendario/";
-      const url = "/campeonato-general.html";
-      const $ = await fetchHTML(urlBase + "/" + key + url);
-
-      $("tbody tr").each((i, el) => {
-        const pos = $(el).find("td span.label.label-danger").text();
-        const number = $(el).find("td").next().html();
-        const pilot = $(el).find("td a").text();
-        const brand = urlBase + $(el).find("td img").attr("src");
-        const cups = $(el).find("td img").next().text();
-        const pts = $(el).find("td span.label.label-red").text();
-        const data = {
-          pos: pos,
-          number: number,
-          pilot: pilot,
-          cups: cups,
-          brand: brand,
-          pts: pts,
-        };
-        pilots.push(data);
-      });
-
-      console.log(pilots);
-    } catch (e) {
-      console.log(e);
-    }
-    return pilots;
-  }
-
-  async function calendar(key) {
-    const dates = [];
-    try {
-      const urlBase = "https://www.auvo.com.uy/";
-      const url = "/calendario";
-      const $ = await fetchHTML(urlBase + url);
-
-      $(".post-calendario-img").each((i, el) => {
-        const date = "";
-        const name = "";
-        const desc = "";
-        const circuit = $(el).find("img").attr("src");
-        const data = {
-          date: date,
-          name: name,
-          desc: desc,
-          circuit: circuit,
-        };
-        dates.push(data);
-      });
-
-      console.log(dates);
-    } catch (e) {
-      console.log("CALENDAR error: " + e);
-    }
-    return dates;
-  }
-
-  var result;
-  if (typ == "champ") {
-    this.result = await champ(cat);
-  } else if (typ == "calendar") {
-    this.result = await calendar(cat);
-  } else {
-    this.result = "Default response: " + cat + " - " + typ;
-  }
+async function fetchHTML(url) {
+  const { data } = await axios.get(url);
+  return cheerio.load(data);
 }
+
+async function champ() {
+  const data = [];
+  try {
+    const urlBase = "http://www.motoresenpunta.com/";
+    const url = "";
+    const $ = await fetchHTML(urlBase + url);
+    let table = "";
+    if (cat == "uyst") {
+      table = "1";
+    }
+    if (cat == "uyse") {
+      table = "2";
+    }
+    $(".tablepress.tablepress-id-" + table + " tbody tr").each((i, ele) => {
+      if (i != 0) {
+        const el = $(ele).find("td");
+        data.push({
+          pos: $(el[0]).text(),
+          number: "",
+          pilot: $(el[1]).text().trim(),
+          cups: "",
+          brand: "",
+          brandLogo: "",
+          pts: $(el[2]).text().trim(),
+          diff: "",
+          lastre: "",
+        });
+      }
+    });
+    console.log(data);
+  } catch (e) {
+    //console.log(e);
+  }
+  return data;
+}
+
+async function events() {
+  const dates = [];
+  try {
+    const urlBase = "https://aptpweb.com.ar";
+    const url = "/calendario-";
+    const $ = await fetchHTML(urlBase + url + year);
+    $("img.vc_single_image-img.attachment-large").each((i, ele) => {
+      dates.push({
+        idEvent: dates.length + 1,
+        dateEvent: "",
+        strEvent: "",
+        strDescriptionEN: "",
+        strCircuit: "",
+        strThumb: $(ele).attr("src"),
+      });
+    });
+    console.log(dates);
+  } catch (e) {
+    console.log("CALENDAR error: " + e);
+  }
+  return dates;
+}
+
+function init() {
+  champ(); // 2 | 3
+  //events(); // year
+}
+
+init();

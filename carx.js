@@ -1,4 +1,4 @@
-if (steps.init.org == "auvo") {
+if (steps.init.org == "carx") {
   const cheerio = require("cheerio");
   const axios = require("axios");
 
@@ -14,35 +14,29 @@ if (steps.init.org == "auvo") {
   async function champ() {
     const data = [];
     try {
-      const urlBase = "http://www.motoresenpunta.com/";
-      const url = "";
-      const $ = await fetchHTML(urlBase + url);
-      let table = "";
-      if (cat == "uyst") {
-        table = "1";
-      }
-      if (cat == "uyse") {
-        table = "2";
-      }
-      $(".tablepress.tablepress-id-" + table + " tbody tr").each((i, ele) => {
+      const urlBase = "http://carxrallycross.com/";
+      const url = "campeonato-";
+      const $ = await fetchHTML(urlBase + url + cat);
+
+      $("tbody tr").each((i, ele) => {
         if (i != 0) {
           const el = $(ele).find("td");
           data.push({
             pos: $(el[0]).text(),
-            number: "",
-            pilot: $(el[1]).text().trim(),
+            number: $(el[1]).text(),
+            pilot: $(el[2]).text(),
             cups: "",
             brand: "",
             brandLogo: "",
-            pts: $(el[2]).text().trim(),
+            pts: $(el).children().last().text().trim(),
             diff: "",
             lastre: "",
           });
         }
       });
-      console.log(data);
+      //console.log(data);
     } catch (e) {
-      //console.log(e);
+      console.log(e);
     }
     return data;
   }
@@ -50,23 +44,19 @@ if (steps.init.org == "auvo") {
   async function events() {
     const dates = [];
     try {
-      const urlBase = "https://www.auvo.com.uy/";
+      const urlBase = "http://carxrallycross.com";
       const url = "/calendario";
       const $ = await fetchHTML(urlBase + url);
-
-      $(".post-calendario-img").each((i, el) => {
-        const date = "";
-        const name = "";
-        const desc = "";
-        const circuitImg = $(el).find("img").attr("src");
-        const data = {
-          dateEvent: date,
-          strEvent: name,
-          strDescriptionEN: desc,
-          strCircuit: desc,
-          strMap: circuitImg,
-        };
-        dates.push(data);
+      $("tbody tr.prox-calen").each((i, ele) => {
+        const el = $(ele).find("td");
+        dates.push({
+          idEvent: $(el[0]).text().trim(),
+          dateEvent: $(el[1]).text().trim(),
+          strEvent: $(el[2]).text().trim(),
+          strDescriptionEN: "",
+          strCircuit: "",
+          strThumb: "",
+        });
       });
       //console.log(dates);
     } catch (e) {
@@ -83,11 +73,12 @@ if (steps.init.org == "auvo") {
   } else {
     this.result = "Default response: " + cat + " - " + typ;
   }
-  /* 
-  function init() {
-    //champ("trseries");
-    calendar(""); // toprace | trseries | trjunior
+
+  /* function init() {
+    champ("toprace");
+    events("toprace"); // toprace | trseries | trjunior
   }
   
-  init(); */
+  init();
+   */
 }
